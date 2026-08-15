@@ -2,16 +2,16 @@
   display: grid;
   min-height: 100vh;
   place-content: center;
-  gap: 18px;
+  gap: 20px;
   color: var(--ink-soft);
   text-align: center;
 }
 
 .boot-screen p {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 650;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -20,13 +20,14 @@
   height: 44px;
   align-items: flex-end;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .boot-mark span {
   width: 8px;
   border-radius: 99px;
-  background: var(--surface-dark);
+  background: linear-gradient(to top, var(--surface-dark), #2c4036);
+  box-shadow: 0 4px 14px rgba(14, 21, 18, 0.18);
   animation: boot-wave 1s ease-in-out infinite;
 }
 

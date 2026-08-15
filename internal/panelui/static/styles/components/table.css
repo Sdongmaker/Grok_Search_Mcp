@@ -45,7 +45,7 @@
   gap: 3px;
   padding: 3px;
   border: 1px solid var(--line);
-  border-radius: 11px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.72);
 }
 
@@ -53,16 +53,28 @@
   min-height: 32px;
   padding: 0 11px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 9px;
   background: transparent;
   color: var(--ink-faint);
   cursor: pointer;
   font-size: 10px;
   font-weight: 700;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.filter-pill:not(.is-active):hover {
+  color: var(--ink);
 }
 
 .filter-pill.is-active {
   background: var(--surface-dark);
+  box-shadow:
+    0 4px 12px rgba(14, 21, 18, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
@@ -70,7 +82,7 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   box-shadow: var(--shadow-sm);
 }
 
@@ -86,7 +98,7 @@
 
 .data-table th,
 .data-table td {
-  padding: 15px 18px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: middle;
@@ -97,7 +109,7 @@
   color: var(--ink-faint);
   font-size: 9px;
   font-weight: 760;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -108,11 +120,13 @@
 }
 
 .data-table tbody tr {
-  transition: background var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .data-table tbody tr:hover {
-  background: #fbfcfa;
+  background: #f7faf3;
 }
 
 .data-table tbody tr:last-child td {
@@ -137,6 +151,11 @@
   color: var(--violet);
   font-size: 11px;
   font-weight: 760;
+  transition: transform var(--transition-fast);
+}
+
+.data-table tbody tr:hover .cell-icon {
+  transform: scale(1.06);
 }
 
 /* 用户管理使用文字首字母；仅收紧其他表格中的 SVG 图标。 */
@@ -190,16 +209,20 @@
   height: 32px;
   place-items: center;
   border: 0;
-  border-radius: 9px;
+  border-radius: 10px;
   background: transparent;
   color: var(--ink-faint);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .table-action:hover {
   background: var(--canvas);
   color: var(--ink);
+  transform: scale(1.08);
 }
 
 .table-action:disabled {

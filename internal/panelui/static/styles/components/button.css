@@ -4,16 +4,20 @@
   height: 30px;
   place-items: center;
   border: 0;
-  border-radius: 9px;
+  border-radius: 10px;
   background: transparent;
   color: rgba(255, 255, 255, 0.36);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .logout-button:hover {
-  background: rgba(226, 82, 82, 0.14);
+  background: rgba(223, 79, 75, 0.14);
   color: #ff9898;
+  transform: scale(1.08);
 }
 
 .icon-button {
@@ -26,17 +30,28 @@
   background: rgba(255, 255, 255, 0.78);
   color: var(--ink-soft);
   cursor: pointer;
-  transition: background var(--transition-fast), border var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    border var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .icon-button:hover {
   border-color: var(--line-strong);
   background: var(--surface);
+  box-shadow: var(--shadow-sm);
   color: var(--ink);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+}
+
+.icon-button:active {
+  transform: translateY(0) scale(0.94);
 }
 
 .button {
+  position: relative;
   display: inline-flex;
   min-height: 42px;
   align-items: center;
@@ -44,19 +59,26 @@
   gap: 8px;
   padding: 0 15px;
   border: 1px solid transparent;
-  border-radius: 11px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 720;
-  transition: transform var(--transition-fast), background var(--transition-fast), border var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  transition:
+    transform var(--transition-fast),
+    background var(--transition-fast),
+    border var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .button:hover:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .button:active:not(:disabled) {
-  transform: translateY(0) scale(0.985);
+  transform: translateY(0) scale(0.97);
+  transition-duration: 60ms;
 }
 
 .button:disabled {
@@ -66,22 +88,32 @@
 
 .button-primary {
   background: var(--surface-dark);
-  box-shadow: 0 7px 20px rgba(16, 24, 20, 0.14);
+  box-shadow:
+    0 8px 22px rgba(14, 21, 18, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
 .button-primary:hover:not(:disabled) {
-  background: #1c2a22;
-  box-shadow: 0 10px 24px rgba(16, 24, 20, 0.18);
+  background: #1d2b23;
+  box-shadow:
+    0 12px 30px rgba(14, 21, 18, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .button-accent {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), #a3e53a);
+  box-shadow:
+    0 6px 18px rgba(150, 210, 50, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
   color: var(--accent-ink);
 }
 
 .button-accent:hover:not(:disabled) {
-  background: #c8fa70;
+  box-shadow:
+    0 10px 26px rgba(150, 210, 50, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  filter: brightness(1.03);
 }
 
 .button-secondary {
@@ -93,6 +125,7 @@
 .button-secondary:hover:not(:disabled) {
   border-color: var(--line-strong);
   background: var(--surface-muted);
+  box-shadow: var(--shadow-sm);
 }
 
 .button-danger {
@@ -101,7 +134,8 @@
 }
 
 .button-danger:hover:not(:disabled) {
-  background: #ffe2df;
+  background: #fbe3e0;
+  box-shadow: 0 6px 16px rgba(223, 79, 75, 0.14);
 }
 
 .button-ghost {

@@ -18,7 +18,7 @@
   padding: clamp(28px, 4vw, 48px);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 15% 120%, rgba(189, 244, 92, 0.18), transparent 24rem),
+    radial-gradient(circle at 15% 120%, rgba(182, 243, 75, 0.18), transparent 24rem),
     linear-gradient(132deg, #101814 0%, #16231c 52%, #1e2b23 100%);
   box-shadow: 0 24px 64px rgba(16, 24, 20, 0.16);
   color: #f6faf7;
@@ -203,7 +203,7 @@
   left: 24px;
   height: 3px;
   border-radius: 0 0 99px 99px;
-  background: linear-gradient(90deg, transparent, rgba(118, 103, 244, 0.72), transparent);
+  background: linear-gradient(90deg, transparent, rgba(111, 100, 240, 0.72), transparent);
   content: "";
   opacity: 0.36;
 }
@@ -240,15 +240,15 @@
   height: 44px;
   flex: 0 0 44px;
   place-items: center;
-  border: 1px solid rgba(118, 103, 244, 0.13);
+  border: 1px solid rgba(111, 100, 240, 0.13);
   border-radius: 14px;
   background: var(--violet-soft);
   color: var(--violet);
 }
 
 .tier-card.is-default .tier-symbol {
-  border-color: rgba(144, 206, 44, 0.22);
-  background: rgba(189, 244, 92, 0.23);
+  border-color: rgba(132, 200, 38, 0.22);
+  background: rgba(182, 243, 75, 0.23);
   color: #568b11;
 }
 
@@ -286,7 +286,7 @@
   height: 5px;
   border-radius: 50%;
   background: var(--accent-strong);
-  box-shadow: 0 0 0 4px rgba(144, 206, 44, 0.12);
+  box-shadow: 0 0 0 4px rgba(132, 200, 38, 0.12);
 }
 
 .tier-card h3 {

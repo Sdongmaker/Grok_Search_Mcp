@@ -12,7 +12,7 @@
   padding: clamp(26px, 3.5vw, 42px);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 85% 15%, rgba(189, 244, 92, 0.2), transparent 15rem),
+    radial-gradient(circle at 85% 15%, rgba(182, 243, 75, 0.2), transparent 15rem),
     var(--surface-dark);
   box-shadow: var(--shadow-dark);
   color: #fff;
@@ -214,7 +214,10 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--accent-strong);
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+  box-shadow: 0 0 10px rgba(132, 200, 38, 0.35);
+  transform-origin: left;
+  animation: grow-bar 800ms var(--ease-silk) both;
 }
 
 .account-quota-item p {

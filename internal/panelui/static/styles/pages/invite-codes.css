@@ -13,6 +13,16 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.invite-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .invite-code {
@@ -94,7 +104,7 @@
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--canvas-soft);
+  background: var(--surface-muted);
 }
 
 .invite-redemption-copy {
@@ -123,7 +133,7 @@
 
 .invite-redemption-row time {
   flex: 0 0 auto;
-  color: var(--ink-muted);
+  color: var(--ink-faint);
   font-size: 11px;
 }
 

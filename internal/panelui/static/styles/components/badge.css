@@ -2,14 +2,16 @@
 .role-badge,
 .tier-badge {
   display: inline-flex;
-  min-height: 25px;
+  min-height: 24px;
   align-items: center;
-  gap: 6px;
-  padding: 0 9px;
+  gap: 5px;
+  padding: 0 10px;
+  border: 1px solid transparent;
   border-radius: 999px;
   font-size: 9px;
-  font-weight: 760;
-  letter-spacing: 0.02em;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  transition: transform var(--transition-fast);
   white-space: nowrap;
 }
 
@@ -18,6 +20,7 @@
   height: 5px;
   border-radius: 50%;
   background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 14%, transparent);
   content: "";
 }
 
@@ -27,8 +30,8 @@
 }
 
 .status-badge.is-disabled {
-  background: #eef1ef;
-  color: #7f8a84;
+  background: #edf0ed;
+  color: #7d8881;
 }
 
 .status-badge.is-failed {

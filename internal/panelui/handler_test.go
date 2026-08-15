@@ -153,7 +153,7 @@ func TestHandlerServesNestedStylesheetAsCSS(t *testing.T) {
 	if contentType := responseRecorder.Header().Get("Content-Type"); !strings.HasPrefix(contentType, "text/css") {
 		t.Fatalf("Content-Type = %q, want text/css", contentType)
 	}
-	if body := responseRecorder.Body.String(); !strings.Contains(body, "--canvas: #f2f5f1;") {
+	if body := responseRecorder.Body.String(); !strings.Contains(body, "--canvas: #f4f6f1;") {
 		t.Fatalf("expected tokens stylesheet response body, got %q", body)
 	}
 }

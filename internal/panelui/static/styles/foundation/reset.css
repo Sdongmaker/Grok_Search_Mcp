@@ -37,10 +37,17 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 76% -20%, rgba(189, 244, 92, 0.14), transparent 34rem),
+    radial-gradient(ellipse 60rem 34rem at 78% -22%, rgba(182, 243, 75, 0.13), transparent 62%),
+    radial-gradient(ellipse 44rem 30rem at -12% 108%, rgba(111, 100, 240, 0.05), transparent 60%),
     var(--canvas);
+  background-attachment: fixed;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(182, 243, 75, 0.42);
+  color: var(--accent-ink);
 }
 
 button,
@@ -67,8 +74,9 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(118, 103, 244, 0.22);
+  outline: 2px solid rgba(132, 200, 38, 0.55);
   outline-offset: 2px;
+  border-radius: 6px;
 }
 
 a {

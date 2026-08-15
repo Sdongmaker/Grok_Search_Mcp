@@ -32,7 +32,11 @@
   border-radius: 12px;
   background: var(--surface);
   color: var(--ink);
-  transition: border var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .text-input {
@@ -41,7 +45,7 @@
 }
 
 .text-input::placeholder {
-  color: #a7b0aa;
+  color: #a2aca6;
 }
 
 .text-input:hover {
@@ -49,8 +53,10 @@
 }
 
 .text-input:focus {
-  border-color: var(--violet);
-  box-shadow: 0 0 0 4px rgba(118, 103, 244, 0.1);
+  border-color: var(--accent-strong);
+  box-shadow:
+    0 0 0 4px rgba(132, 200, 38, 0.12),
+    var(--shadow-sm);
   outline: none;
 }
 
@@ -89,7 +95,10 @@
   color: var(--ink);
   font: inherit;
   text-align: left;
-  transition: border var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
   cursor: pointer;
 }
 
@@ -99,14 +108,16 @@
 
 .custom-select-trigger:focus,
 .custom-select.is-open .custom-select-trigger {
-  border-color: var(--violet);
-  box-shadow: 0 0 0 4px rgba(118, 103, 244, 0.1);
+  border-color: var(--accent-strong);
+  box-shadow:
+    0 0 0 4px rgba(132, 200, 38, 0.12),
+    var(--shadow-sm);
   outline: none;
 }
 
 .custom-select.is-invalid .custom-select-trigger {
   border-color: var(--danger);
-  box-shadow: 0 0 0 4px rgba(226, 82, 82, 0.1);
+  box-shadow: 0 0 0 4px rgba(223, 79, 75, 0.1);
 }
 
 .custom-select-trigger:disabled {
@@ -130,7 +141,7 @@
   border-bottom: 2px solid currentColor;
   color: var(--ink-faint);
   transform: translateY(-2px) rotate(45deg);
-  transition: transform var(--transition-fast);
+  transition: transform var(--transition-smooth);
 }
 
 .custom-select.is-open .custom-select-chevron {
@@ -147,10 +158,11 @@
   overflow-y: auto;
   padding: 6px;
   border: 1px solid var(--line);
-  border-radius: 13px;
+  border-radius: 14px;
   background: var(--surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   overscroll-behavior: contain;
+  animation: enter-soft 220ms var(--ease-silk) both;
 }
 
 .custom-select-menu[popover] {
@@ -182,6 +194,10 @@
   line-height: 1.35;
   text-align: left;
   cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .custom-select-option:hover,
@@ -189,11 +205,12 @@
   background: var(--surface-muted);
   color: var(--ink);
   outline: none;
+  transform: translateX(2px);
 }
 
 .custom-select-option[aria-selected="true"] {
-  background: var(--violet-soft);
-  color: var(--violet);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
   font-weight: 680;
 }
 

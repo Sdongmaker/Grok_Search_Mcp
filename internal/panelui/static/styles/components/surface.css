@@ -1,6 +1,10 @@
 .content-card {
   overflow: hidden;
   border-radius: var(--radius-md);
+  transition:
+    box-shadow var(--transition-smooth),
+    border-color var(--transition-smooth),
+    transform var(--transition-smooth);
 }
 
 .card-header {
@@ -17,7 +21,7 @@
 .card-header h3 {
   margin: 0;
   font-size: 13px;
-  font-weight: 740;
+  font-weight: 730;
   letter-spacing: -0.015em;
 }
 
@@ -49,9 +53,11 @@
   height: 58px;
   margin: 0 auto 18px;
   place-items: center;
-  border-radius: 18px;
+  border: 1px solid var(--line);
+  border-radius: 19px;
   background: var(--canvas);
   color: var(--ink-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .empty-state-icon svg {

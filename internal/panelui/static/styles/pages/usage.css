@@ -69,13 +69,13 @@
 }
 
 .table-action.is-debug {
-  border: 1px solid rgba(118, 103, 244, 0.16);
+  border: 1px solid rgba(111, 100, 240, 0.16);
   background: var(--violet-soft);
   color: var(--violet);
 }
 
 .table-action.is-debug:hover {
-  border-color: rgba(118, 103, 244, 0.3);
+  border-color: rgba(111, 100, 240, 0.3);
   background: #e5e0ff;
   color: #5a49dc;
 }

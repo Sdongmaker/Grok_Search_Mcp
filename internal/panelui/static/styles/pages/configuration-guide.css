@@ -15,7 +15,7 @@
   padding: clamp(30px, 5vw, 58px);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 82% 20%, rgba(189, 244, 92, 0.2), transparent 17rem),
+    radial-gradient(circle at 82% 20%, rgba(182, 243, 75, 0.2), transparent 17rem),
     var(--surface-dark);
   box-shadow: var(--shadow-md);
   color: #f7faf8;
@@ -27,7 +27,7 @@
   bottom: -150px;
   width: 320px;
   height: 320px;
-  border: 1px solid rgba(189, 244, 92, 0.14);
+  border: 1px solid rgba(182, 243, 75, 0.14);
   border-radius: 50%;
   content: "";
 }
@@ -383,7 +383,7 @@
   width: 27px;
   height: 27px;
   border-radius: 9px;
-  background: rgba(189, 244, 92, 0.32);
+  background: rgba(182, 243, 75, 0.32);
   color: var(--success);
 }
 

@@ -24,7 +24,20 @@
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 252, 249, 0.9)),
     var(--surface);
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border var(--transition-smooth);
+  transition:
+    transform var(--transition-smooth),
+    box-shadow var(--transition-smooth),
+    border-color var(--transition-smooth);
+}
+
+.metric-card:hover {
+  border-color: color-mix(in srgb, var(--metric-ink, var(--violet)) 22%, var(--line));
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.metric-card:hover .metric-icon {
+  transform: scale(1.06) rotate(-2deg);
 }
 
 .metric-card::before {
@@ -112,6 +125,7 @@
     0 7px 18px color-mix(in srgb, var(--metric-ink, var(--violet)) 10%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   color: var(--metric-ink, var(--violet));
+  transition: transform var(--transition-spring);
 }
 
 .metric-icon svg {
