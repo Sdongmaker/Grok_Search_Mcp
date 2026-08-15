@@ -20,6 +20,8 @@ export function createApplicationEvents({
   renderApplication,
   renderModalRegion,
   loadCurrentPage,
+  loadDashboardScopedUsage,
+  recheckHealth,
   abortCurrentPageLoad,
   normalizeCurrentPageForRole,
   handleSessionError,
@@ -37,6 +39,7 @@ export function createApplicationEvents({
     modalController,
     renderApplication,
     loadCurrentPage,
+    loadDashboardScopedUsage,
     normalizeCurrentPageForRole
   });
   const authEvents = createAuthEvents({
@@ -144,7 +147,26 @@ export function createApplicationEvents({
       enabled: state.turnstileEnabled,
       siteKey: state.turnstileSiteKey
     }),
-    navigate: (actionElement) => navigationEvents.navigateToPage(actionElement.dataset.page),
+    navigate: (actionElement) => navigationEvents.navigateToPage(
+      actionElement.dataset.page,
+      actionElement.dataset.tab || ""
+    ),
+    "recheck-health": () => recheckHealth(),
+    "set-dashboard-scope": (actionElement) => navigationEvents.setDashboardScope(
+      actionElement.dataset.scope
+    ),
+    "set-dashboard-period": (actionElement) => navigationEvents.setDashboardPeriod(
+      actionElement.dataset.period
+    ),
+    "set-records-scope": (actionElement) => navigationEvents.setRecordsScope(
+      actionElement.dataset.scope
+    ),
+    "set-records-period": (actionElement) => navigationEvents.setRecordsPeriod(
+      actionElement.dataset.period
+    ),
+    "set-record-status": (actionElement) => navigationEvents.setRecordStatus(
+      actionElement.dataset.status
+    ),
     "toggle-sidebar": () => setSidebarOpen(!state.sidebarOpen),
     "close-sidebar": () => setSidebarOpen(false),
     logout: () => authEvents.logout(),
@@ -162,9 +184,6 @@ export function createApplicationEvents({
     "open-key-usage": (actionElement) => keyEvents.openUsageModal(actionElement.dataset.id),
     "confirm-delete-key": (actionElement) => keyEvents.openDeleteConfirmation(
       actionElement.dataset.id
-    ),
-    "set-usage-period": (actionElement) => navigationEvents.setUsagePeriod(
-      actionElement.dataset.period
     ),
     "view-debug-json": (actionElement) => debugJSONModalEvents.openDebugJSONModal(
       actionElement.dataset.recordId
@@ -281,11 +300,17 @@ export function createApplicationEvents({
   }
 
   async function handleApplicationChange(event) {
-    const actionElement = event.target.closest('[data-action="change-list-page-size"]');
-    if (!actionElement || actionElement.dataset.list !== "usageRecords") {
+    const actionElement = event.target.closest("[data-action]");
+    if (!actionElement) {
       return;
     }
-    await navigationEvents.changeUsagePageSize(actionElement.value);
+    if (actionElement.dataset.action === "change-list-page-size" && actionElement.dataset.list === "usageRecords") {
+      await navigationEvents.changeUsagePageSize(actionElement.value);
+      return;
+    }
+    if (actionElement.dataset.action === "set-record-tool") {
+      navigationEvents.setRecordTool(actionElement.value);
+    }
   }
 
   async function handleModalChange(event) {

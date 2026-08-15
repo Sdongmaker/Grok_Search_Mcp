@@ -1,15 +1,17 @@
 import {
   APIError,
   fetchAllTiers,
+  fetchAdminGlobalUsage,
+  fetchAdminGlobalUsageRecords,
   fetchAdminUsers,
   fetchCurrentUser,
+  fetchDashboard,
   fetchInviteCodes,
   fetchKeys,
   fetchOperationalMetrics,
   fetchOverviewHealth,
   fetchRegistrationSettings,
   fetchSettings,
-  fetchTiers,
   fetchUsage,
   fetchUsageRecords,
   panelAPI
@@ -27,6 +29,7 @@ import {
   clearAuthenticatedState,
   COLLECTION_PAGE_SIZE,
   commitPageData,
+  normalizeDashboard,
   normalizeUsage,
   pageHasExistingData,
   state
@@ -42,6 +45,11 @@ let activePageRequestIdentifier = 0;
 let activePageRequestController = null;
 let activeOverviewHealthRequestController = null;
 let authenticationSettingsRequestIdentifier = 0;
+let operationsPollingTimer = null;
+
+// 运行指标轮询间隔与趋势缓冲长度（仅客户端，不影响后端）。
+const OPERATIONS_POLL_INTERVAL_MS = 5000;
+const OPERATIONS_HISTORY_LIMIT = 30;
 
 function abortCurrentPageLoad() {
   activePageRequestController?.abort();
@@ -61,10 +69,70 @@ function renderApplication() {
   document.title = state.authenticated
     ? `${pageMetadata[state.currentPage]?.title || "控制台"} · Grok Search MCP`
     : "登录 · Grok Search MCP Control";
+  syncOperationsPolling();
 }
 
 function renderModalRegion() {
   renderSafeHTML(modalRegionElement, renderModal(state));
+}
+
+// 顶栏健康徽标的点击重检查：中断在途探测后立即重新加载。
+function recheckHealth() {
+  activeOverviewHealthRequestController?.abort();
+  activeOverviewHealthRequestController = null;
+  void loadHealthIndependently(activePageRequestIdentifier);
+}
+
+// 仅在「系统 → 运行指标」Tab 激活且服务端已启用时轮询；离开即停止。
+function syncOperationsPolling() {
+  const shouldPoll = Boolean(
+    state.authenticated
+    && state.currentPage === "system"
+    && state.systemTab === "operations"
+    && state.data.settings?.operations_metrics_enabled
+  );
+
+  if (!shouldPoll) {
+    if (operationsPollingTimer) {
+      clearInterval(operationsPollingTimer);
+      operationsPollingTimer = null;
+    }
+    return;
+  }
+  if (operationsPollingTimer) {
+    return;
+  }
+  operationsPollingTimer = setInterval(pollOperationsMetrics, OPERATIONS_POLL_INTERVAL_MS);
+}
+
+async function pollOperationsMetrics() {
+  try {
+    const operationsMetrics = await fetchOperationalMetrics();
+    if (state.currentPage !== "system" || state.systemTab !== "operations") {
+      return;
+    }
+    state.data.operationsMetrics = operationsMetrics;
+    pushOperationsHistorySample(operationsMetrics);
+    renderApplication();
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      return;
+    }
+    // 轮询失败保留上一份快照；会话失效走统一登出。
+    handleSessionError(error);
+  }
+}
+
+function pushOperationsHistorySample(operationsMetrics) {
+  const history = Array.isArray(state.data.operationsHistory) ? state.data.operationsHistory : [];
+  history.push({
+    goroutines: Number(operationsMetrics?.runtime?.goroutines || 0),
+    heapBytes: Number(operationsMetrics?.runtime?.memory?.heap_allocated_bytes || 0)
+  });
+  if (history.length > OPERATIONS_HISTORY_LIMIT) {
+    history.splice(0, history.length - OPERATIONS_HISTORY_LIMIT);
+  }
+  state.data.operationsHistory = history;
 }
 
 async function initializeApplication() {
@@ -81,6 +149,8 @@ async function initializeApplication() {
     renderApplication,
     renderModalRegion,
     loadCurrentPage,
+    loadDashboardScopedUsage,
+    recheckHealth,
     abortCurrentPageLoad,
     normalizeCurrentPageForRole,
     handleSessionError,
@@ -143,15 +213,16 @@ async function loadAuthenticationSettings() {
 
 function normalizeCurrentPageForRole() {
   if (!availablePages.has(state.currentPage)) {
-    state.currentPage = "overview";
+    state.currentPage = "dashboard";
   }
   if (adminPages.has(state.currentPage) && state.user?.role !== "admin") {
-    state.currentPage = "overview";
-    window.history.replaceState(null, "", "#overview");
+    state.currentPage = "dashboard";
+    window.history.replaceState(null, "", "#dashboard");
   }
-  if (state.currentPage === "operationsMetrics" && !state.data.settings?.operations_metrics_enabled) {
-    state.currentPage = "overview";
-    window.history.replaceState(null, "", "#overview");
+  // 运行指标并入系统页 Tab；未启用时回退到服务设置 Tab。
+  if (state.currentPage === "system" && state.systemTab === "operations" && !state.data.settings?.operations_metrics_enabled) {
+    state.systemTab = "settings";
+    window.history.replaceState(null, "", "#system/settings");
   }
 }
 
@@ -163,6 +234,8 @@ async function loadCurrentPage(options = {}) {
     state.pageLoading = false;
     state.refreshing = false;
     renderApplication();
+    // 静态页（接入指南）同样需要顶栏与状态徽标的健康数据。
+    void loadHealthIndependently(activePageRequestIdentifier);
     return true;
   }
 
@@ -179,9 +252,8 @@ async function loadCurrentPage(options = {}) {
       return false;
     }
     commitPageData(page, pageResult);
-    if (page === "overview") {
-      void loadOverviewHealthIndependently(requestIdentifier);
-    }
+    // 健康检查独立异步加载：失败降级为 unknown，不阻塞页面主体。
+    void loadHealthIndependently(requestIdentifier);
     return true;
   } catch (error) {
     if (requestIdentifier !== activePageRequestIdentifier) {
@@ -207,16 +279,17 @@ async function loadCurrentPage(options = {}) {
   }
 }
 
-async function loadOverviewHealthIndependently(requestIdentifier) {
+// loadHealthIndependently 为仪表盘/接入指南与顶栏健康徽标提供独立的健康检查加载。
+async function loadHealthIndependently(requestIdentifier) {
   const requestController = new AbortController();
   activeOverviewHealthRequestController = requestController;
 
   try {
-    const overviewHealth = await fetchOverviewHealth({ signal: requestController.signal });
-    if (requestIdentifier !== activePageRequestIdentifier || state.currentPage !== "overview") {
+    const health = await fetchOverviewHealth({ signal: requestController.signal });
+    if (requestIdentifier !== activePageRequestIdentifier) {
       return;
     }
-    state.data.overviewHealth = overviewHealth;
+    state.data.health = health;
   } catch (error) {
     if (requestIdentifier !== activePageRequestIdentifier || error?.name === "AbortError") {
       return;
@@ -224,16 +297,48 @@ async function loadOverviewHealthIndependently(requestIdentifier) {
     if (handleSessionError(error)) {
       return;
     }
-    state.data.overviewHealth = { status: "unknown", checked_at: "" };
+    state.data.health = { status: "unknown", checked_at: "" };
   } finally {
     if (activeOverviewHealthRequestController === requestController) {
       activeOverviewHealthRequestController = null;
     }
-    if (
-      requestIdentifier === activePageRequestIdentifier
-      && state.authenticated
-      && state.currentPage === "overview"
-    ) {
+    if (requestIdentifier === activePageRequestIdentifier && state.authenticated) {
+      renderApplication();
+    }
+  }
+}
+
+// loadDashboardScopedUsage 为非 24h 范围或全站视角增量加载用量统计，
+// 避免重复请求仪表盘聚合载荷。
+async function loadDashboardScopedUsage() {
+  const scope = state.dashboard.scope === "global" && state.data.dashboard?.global ? "global" : "mine";
+  const period = state.dashboard.period;
+  const since = getUsagePeriodSince(period);
+  state.data.dashboardScopedUsage = null;
+  renderApplication();
+
+  try {
+    const scopedUsage = scope === "global"
+      ? await fetchAdminGlobalUsage({ since, limit: 5 })
+      : await fetchUsage(since, { limit: 5 });
+    if (state.currentPage !== "dashboard" || state.dashboard.scope !== scope || state.dashboard.period !== period) {
+      return;
+    }
+    state.data.dashboardScopedUsage = {
+      scope,
+      period,
+      usage: normalizeUsage(scopedUsage)
+    };
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      return;
+    }
+    if (handleSessionError(error)) {
+      return;
+    }
+    showToast("加载失败", getErrorMessage(error), "error");
+  } finally {
+    if (state.authenticated && state.currentPage === "dashboard") {
       renderApplication();
     }
   }
@@ -241,61 +346,64 @@ async function loadOverviewHealthIndependently(requestIdentifier) {
 
 async function loadPageData(page, signal) {
   switch (page) {
-    case "overview": {
-      const settingsRequest = state.user?.role === "admin"
-        ? fetchSettings({ signal })
-        : Promise.resolve(null);
-      const [user, keyResponse, usage, settings] = await Promise.all([
-        fetchCurrentUser({ signal }),
-        fetchKeys({ signal, limit: COLLECTION_PAGE_SIZE }),
-        fetchUsage(getUsagePeriodSince("24h"), { signal }),
+    case "dashboard": {
+      // 单请求聚合首屏；管理员附带全站统计。设置仅用于运行指标 Tab 的可见性判断。
+      const settingsRequest = state.user?.role === "admin" && !state.data.settings
+        ? fetchSettings({ signal }).catch(() => null)
+        : Promise.resolve(state.data.settings || null);
+      const [dashboard, settings] = await Promise.all([
+        fetchDashboard({ signal }),
         settingsRequest
       ]);
       return {
-        user,
-        keyResponse,
-        overviewUsage: normalizeUsage(usage),
+        user: dashboard?.user || state.user,
+        dashboard: normalizeDashboard(dashboard),
         settings
       };
     }
     case "keys": {
       return { keyResponse: await fetchCollectionPage(fetchKeys, state.pagination.keys, signal) };
     }
-    case "usage": {
+    case "records": {
       const since = getUsagePeriodSince(state.filters.usagePeriod);
       const cursor = state.pagination.usageRecords.cursor;
       const pageSize = state.pagination.usageRecords.pageSize;
+      const isGlobalScope = state.records.scope === "global" && state.user?.role === "admin";
       if (cursor) {
-        const recordPage = await fetchUsageRecords(since, { signal, cursor, limit: pageSize });
+        const recordPage = isGlobalScope
+          ? await fetchAdminGlobalUsageRecords({ signal, since, cursor, limit: pageSize })
+          : await fetchUsageRecords(since, { signal, cursor, limit: pageSize });
         return {
           usage: normalizeUsage({
-            ...(state.data.usage || {}),
+            ...(state.data.records || {}),
             records: recordPage?.records || [],
             next_cursor: recordPage?.next_cursor || "",
             has_more: Boolean(recordPage?.has_more)
           })
         };
       }
-      const usage = await fetchUsage(since, { signal, limit: pageSize });
+      const usage = isGlobalScope
+        ? await fetchAdminGlobalUsage({ signal, since, limit: pageSize })
+        : await fetchUsage(since, { signal, limit: pageSize });
       return { usage: normalizeUsage(usage) };
     }
-    case "users": {
-      const [userResponse, tierResponse] = await Promise.all([
+    case "access": {
+      // 枢纽页一次加载三个 Tab 的数据，切换 Tab 不再产生请求。
+      const [userResponse, tierResponse, inviteResponse] = await Promise.all([
         fetchCollectionPage(fetchAdminUsers, state.pagination.users, signal),
-        fetchAllTiers({ signal, limit: 100 })
+        fetchAllTiers({ signal, limit: 100 }),
+        fetchCollectionPage(fetchInviteCodes, state.pagination.invites, signal)
       ]);
-      return { userResponse, tierResponse };
+      return { userResponse, tierResponse, inviteResponse };
     }
-    case "tiers": {
-      return { tierResponse: await fetchCollectionPage(fetchTiers, state.pagination.tiers, signal) };
+    case "system": {
+      const settings = await fetchSettings({ signal });
+      // 运行指标仅在启用时拉取；激活 Tab 后由轮询保持更新。
+      const operationsMetrics = settings?.operations_metrics_enabled
+        ? await fetchOperationalMetrics({ signal }).catch(() => null)
+        : null;
+      return { settings, operationsMetrics };
     }
-    case "invites": {
-      return { inviteResponse: await fetchCollectionPage(fetchInviteCodes, state.pagination.invites, signal) };
-    }
-    case "settings":
-      return { settings: await fetchSettings({ signal }) };
-    case "operationsMetrics":
-      return { operationsMetrics: await fetchOperationalMetrics({ signal }) };
     case "account":
       return { user: await fetchCurrentUser({ signal }) };
     default:

@@ -332,6 +332,10 @@ export function fetchCurrentUser(options = {}) {
   return panelAPI.request("/panel/v1/me", options);
 }
 
+export function fetchDashboard(options = {}) {
+  return panelAPI.request("/panel/v1/dashboard", options);
+}
+
 export async function changePassword(passwords) {
   return requestReplacementSession("/panel/v1/me/change-password", {
     body: passwords,
@@ -397,6 +401,14 @@ export function deleteAdminUser(userIdentifier) {
 
 export function fetchAdminUserUsage(userIdentifier, options = {}) {
   return requestCollection(`/panel/v1/admin/users/${encodeURIComponent(userIdentifier)}/usage`, options);
+}
+
+export function fetchAdminGlobalUsage(options = {}) {
+  return requestCollection("/panel/v1/admin/usage", options);
+}
+
+export function fetchAdminGlobalUsageRecords(options = {}) {
+  return requestCollection("/panel/v1/admin/usage/records", options);
 }
 
 export function fetchTiers(options = {}) {

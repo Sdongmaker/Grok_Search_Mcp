@@ -17,6 +17,18 @@ export function renderMetricCard(label, value, note, icon, color, iconColor, pos
 function renderMetricVisual(visualType, visualValue) {
   const numericValue = Number(visualValue);
 
+  // bar：用于耗时类指标，横向微量条按 2s 视觉上限填充。
+  if (visualType === "bar") {
+    const valueMs = Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
+    const barRatio = Math.min(1, valueMs / 2000);
+    return `
+      <span class="metric-visual metric-visual-bar ${valueMs > 0 ? "" : "is-empty"}" aria-hidden="true">
+        <span class="metric-bar-track"><i style="--bar-ratio:${barRatio.toFixed(3)}"></i></span>
+        <span class="metric-bar-scale"><span>0</span><span>2s</span></span>
+      </span>
+    `;
+  }
+
   if (visualType === "ring") {
     const progressPercent = Number.isFinite(numericValue) ? Math.max(0, Math.min(100, numericValue)) : 0;
     return `

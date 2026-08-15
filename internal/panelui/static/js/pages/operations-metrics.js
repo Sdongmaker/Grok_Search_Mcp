@@ -2,9 +2,10 @@ import { renderPageHeading } from "../components/loading.js";
 import { renderMetricCard } from "../components/metric-card.js";
 import { escapeHTML, formatDateTime, formatNumber } from "../utils.js";
 
-export function renderOperationsMetricsPage(state) {
+// options.embedded：作为「系统」枢纽页的 Tab 面板渲染，省略页面级标题。
+export function renderOperationsMetricsPage(state, options = {}) {
   if (state.pageLoading && !state.data.operationsMetrics) {
-    return renderOperationsMetricsLoading();
+    return renderOperationsMetricsLoading(options);
   }
 
   const metrics = state.data.operationsMetrics || {};
@@ -31,7 +32,8 @@ export function renderOperationsMetricsPage(state) {
   });
 
   return `
-    ${renderPageHeading("运行指标", "观察 Go 进程、内存与 GC、SQLite、用量写入、限流和认证保护状态。")} 
+    ${options.embedded ? "" : renderPageHeading("运行指标", "观察 Go 进程、内存与 GC、SQLite、用量写入、限流和认证保护状态。")}
+    ${renderLivePulseStrip(state)}
     ${renderPressureNotice(pressureSignals)}
 
     <section class="metric-grid" aria-label="运行状态摘要">
@@ -485,9 +487,57 @@ function renderKeyValueRow(label, value) {
   return `<div><span>${escapeHTML(label)}</span><strong>${escapeHTML(value)}</strong></div>`;
 }
 
-function renderOperationsMetricsLoading() {
+// 实时脉冲条：基于轮询样本（operationsHistory 环形缓冲）渲染 goroutine 与堆内存的近期走势。
+function renderLivePulseStrip(state) {
+  const history = Array.isArray(state.data.operationsHistory) ? state.data.operationsHistory : [];
+  const latestMetrics = state.data.operationsMetrics || {};
+  const latestGoroutines = numericValue(latestMetrics.runtime?.goroutines);
+  const latestHeapBytes = numericValue(latestMetrics.runtime?.memory?.heap_allocated_bytes);
+
   return `
-    ${renderPageHeading("运行指标", "正在读取 Go 运行时、SQLite、用量与防护状态。")} 
+    <div class="operations-live" aria-label="实时运行趋势">
+      <div class="operations-live-head">
+        <span class="operations-live-indicator"><i></i> LIVE</span>
+        <span class="operations-live-hint">该页面激活时每 5 秒采样一次，趋势仅保留最近 ${history.length || 30} 次样本</span>
+      </div>
+      <div class="operations-live-grid">
+        ${renderLiveSparkline("Goroutine", history.map((sample) => sample.goroutines), latestGoroutines, formatNumber)}
+        ${renderLiveSparkline("堆内存", history.map((sample) => sample.heapBytes), latestHeapBytes, formatBytes)}
+      </div>
+    </div>
+  `;
+}
+
+function renderLiveSparkline(label, values, latestValue, formatValue) {
+  const samples = values.filter((value) => Number.isFinite(value));
+  const linePath = buildLiveSparklinePath(samples);
+  return `
+    <div class="operations-live-cell">
+      <div class="operations-live-cell-head"><span>${escapeHTML(label)}</span><strong>${escapeHTML(formatValue(latestValue))}</strong></div>
+      <svg class="operations-live-spark" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true">
+        <path class="operations-live-spark-base" d="M2 26 H118" />
+        ${linePath ? `<path class="operations-live-spark-line" d="${linePath}" />` : ""}
+      </svg>
+    </div>
+  `;
+}
+
+function buildLiveSparklinePath(samples) {
+  if (samples.length < 2) {
+    return "";
+  }
+  const minimumValue = Math.min(...samples);
+  const valueRange = Math.max(1, Math.max(...samples) - minimumValue);
+  return samples.map((sampleValue, sampleIndex) => {
+    const xCoordinate = 2 + (sampleIndex / (samples.length - 1)) * 116;
+    const yCoordinate = 26 - ((sampleValue - minimumValue) / valueRange) * 20;
+    return `${sampleIndex === 0 ? "M" : "L"}${xCoordinate.toFixed(1)} ${yCoordinate.toFixed(1)}`;
+  }).join(" ");
+}
+
+function renderOperationsMetricsLoading(options = {}) {
+  return `
+    ${options.embedded ? "" : renderPageHeading("运行指标", "正在读取 Go 运行时、SQLite、用量与防护状态。")}
     <section class="metric-grid">
       ${Array.from({ length: 4 }, () => '<div class="skeleton" style="height:142px;border-radius:16px"></div>').join("")}
     </section>

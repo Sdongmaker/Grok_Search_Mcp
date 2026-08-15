@@ -173,6 +173,22 @@
   text-align: right;
 }
 
+/* 嵌入枢纽页时，创建按钮移至目录标题行 */
+.tier-catalog-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.tier-catalog-actions p {
+  max-width: 490px;
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 11px;
+  line-height: 1.65;
+  text-align: right;
+}
+
 .tier-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -516,6 +532,18 @@
   }
 
   .tier-catalog-heading p {
+    max-width: 620px;
+    text-align: left;
+  }
+
+  .tier-catalog-actions {
+    width: 100%;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tier-catalog-actions p {
     max-width: 620px;
     text-align: left;
   }

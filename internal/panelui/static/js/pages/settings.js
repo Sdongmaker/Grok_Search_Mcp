@@ -3,9 +3,10 @@ import { renderCustomSelect } from "../components/custom-select.js";
 import { renderIcon } from "../components/icons.js";
 import { renderPageHeading } from "../components/loading.js";
 
-export function renderSettingsPage(state) {
+// options.embedded：作为「系统」枢纽页的 Tab 面板渲染，省略页面级标题。
+export function renderSettingsPage(state, options = {}) {
   if (state.pageLoading && !state.data.settings) {
-    return `${renderPageHeading("服务设置", "热更新上游连接、搜索并发、默认模型、代理与注册策略。")}
+    return `${options.embedded ? "" : renderPageHeading("服务设置", "热更新上游连接、搜索并发、默认模型、代理与注册策略。")}
       <div class="settings-layout"><div class="skeleton" style="height:620px;border-radius:16px"></div><div class="skeleton" style="height:330px;border-radius:16px"></div></div>`;
   }
 
@@ -62,7 +63,7 @@ export function renderSettingsPage(state) {
   });
 
   return `
-    ${renderPageHeading("服务设置", "热更新上游连接、搜索并发、默认模型、代理、注册策略与运维观测。")}
+    ${options.embedded ? "" : renderPageHeading("服务设置", "热更新上游连接、搜索并发、默认模型、代理、注册策略与运维观测。")}
     ${settingsNotApplied ? `<div class="settings-apply-warning" role="status">
       <span class="settings-apply-warning-icon">${renderIcon("warning")}</span>
       <div><strong>设置已保存，尚未应用</strong><p>${persistedValuesReloaded

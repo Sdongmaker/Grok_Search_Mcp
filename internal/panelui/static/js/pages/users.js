@@ -11,12 +11,14 @@ function doesUserMatchSearch(user, normalizedSearch) {
     || normalizeSearchValue(user?.id).includes(normalizedSearch);
 }
 
-export function renderUsersPage(state) {
+// options.embedded：作为「用户与访问」枢纽页的 Tab 面板渲染，省略页面级标题。
+export function renderUsersPage(state, options = {}) {
   const users = state.data.users || [];
   const normalizedSearch = normalizeSearchValue(state.filters.userSearch);
   const filteredUsers = users.filter((user) => doesUserMatchSearch(user, normalizedSearch));
   const hasMatchingUsers = filteredUsers.length > 0;
   const paginationMarkup = renderCollectionPagination("users", state.pagination.users, filteredUsers.length);
+  const heading = options.embedded ? "" : renderPageHeading("用户管理", "管理账户角色、启用状态、配额方案与现有会话。");
   const toolbar = `
     <div class="toolbar">
       <label class="search-field">${renderIcon("search")}<span class="sr-only">搜索用户</span><input class="text-input" type="search" value="${escapeHTML(state.filters.userSearch)}" placeholder="搜索用户名或 ID" data-filter="user-search"></label>
@@ -25,11 +27,11 @@ export function renderUsersPage(state) {
   `;
 
   if (state.pageLoading && !state.data.users) {
-    return `${renderPageHeading("用户管理", "管理账户角色、启用状态、配额方案与现有会话。")}${renderLoadingTable(7, 6)}`;
+    return `${heading}${renderLoadingTable(7, 6)}`;
   }
 
   return `
-    ${renderPageHeading("用户管理", "管理账户角色、启用状态、配额方案与现有会话。")}
+    ${heading}
     ${toolbar}
     <div class="data-card" data-user-search-results>
       <div data-user-search-empty ${hasMatchingUsers ? "hidden" : ""}>

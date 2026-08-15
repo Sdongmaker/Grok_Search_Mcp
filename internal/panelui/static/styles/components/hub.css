@@ -1,0 +1,74 @@
+/* 枢纽页分段 Tab：承载同类工作流的子页面聚合 */
+
+.hub-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-sm);
+}
+
+.hub-tab {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+  white-space: nowrap;
+}
+
+.hub-tab .app-icon {
+  width: 15px;
+  height: 15px;
+  flex-basis: 15px;
+}
+
+.hub-tab:not(.is-active):not(:disabled):hover {
+  background: var(--surface-muted);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.hub-tab.is-active {
+  background: var(--surface-dark);
+  box-shadow:
+    0 5px 14px rgba(14, 21, 18, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.hub-tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.hub-panel {
+  animation: enter-soft 420ms var(--ease-silk) both;
+}
+
+@media (max-width: 640px) {
+  .hub-tabs {
+    display: flex;
+    width: 100%;
+  }
+
+  .hub-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 0 8px;
+  }
+}

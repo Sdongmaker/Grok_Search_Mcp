@@ -11,6 +11,117 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* 实时脉冲条：运行指标 Tab 激活时的轮询趋势 */
+.operations-live {
+  margin-bottom: 14px;
+  padding: 14px 17px 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse 24rem 10rem at 92% -40%, rgba(182, 243, 75, 0.08), transparent 60%),
+    var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.operations-live-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 11px;
+}
+
+.operations-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--success);
+  font-size: 9px;
+  font-weight: 790;
+  letter-spacing: 0.1em;
+}
+
+.operations-live-indicator i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(31, 138, 82, 0.13);
+  animation: metric-live-pulse 1.8s ease-in-out infinite;
+}
+
+.operations-live-hint {
+  color: var(--ink-faint);
+  font-size: 9px;
+}
+
+.operations-live-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.operations-live-cell {
+  padding: 10px 13px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface-muted);
+}
+
+.operations-live-cell-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.operations-live-cell-head span {
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: 0.05em;
+}
+
+.operations-live-cell-head strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.operations-live-spark {
+  display: block;
+  width: 100%;
+  height: 32px;
+}
+
+.operations-live-spark-base {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-dasharray: 2 4;
+  stroke-width: 1;
+}
+
+.operations-live-spark-line {
+  fill: none;
+  stroke: var(--accent-strong);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+  animation: draw-line 700ms var(--ease-silk) both;
+}
+
+@media (max-width: 640px) {
+  .operations-live-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .operations-live-hint {
+    display: none;
+  }
+}
+
 .operations-notice strong,
 .operations-notice span {
   display: block;

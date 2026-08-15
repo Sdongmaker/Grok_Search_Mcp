@@ -244,11 +244,22 @@ type UsageBucket struct {
 type UsageStats struct {
 	TotalCalls     int64
 	SuccessCalls   int64
+	// DurationMsTotal 汇总原始日志与小时/天聚合的耗时总额，供调用方推导平均延迟。
+	DurationMsTotal int64
 	CurrentRPM     int64
 	ByTool         map[string]int64
 	TrafficBuckets []UsageBucket
 	Records        []UsageRecord
 	RecordsPage    UsageRecordPageInfo
+}
+
+// AverageDurationMs 返回每次调用的平均耗时（毫秒）；无调用时返回 0。
+func (s *UsageStats) AverageDurationMs() int64 {
+	if s == nil || s.TotalCalls <= 0 || s.DurationMsTotal <= 0 {
+		return 0
+	}
+	// 四舍五入到最近的毫秒，避免整除长期偏小。
+	return (s.DurationMsTotal + s.TotalCalls/2) / s.TotalCalls
 }
 
 // TimeIDCursor is a stable keyset boundary for collections ordered by time and ID.
@@ -414,8 +425,12 @@ type Store interface {
 	RecordUsage(ctx context.Context, record UsageRecord) error
 	GetUsageStats(ctx context.Context, keyID string, since time.Time) (*UsageStats, error)
 	GetUserUsageStatsPage(ctx context.Context, userID string, since time.Time, cursor *UsageRecordCursor, limit int) (*UsageStats, error)
+	// GetGlobalUsageStatsPage 聚合全站所有密钥的用量统计，仅供管理员仪表盘使用。
+	GetGlobalUsageStatsPage(ctx context.Context, since time.Time, cursor *UsageRecordCursor, limit int) (*UsageStats, error)
 	ListUsageRecordsPage(ctx context.Context, scope UsageRecordListScope, since time.Time, cursor *UsageRecordCursor, limit int) (*UsageRecordPage, error)
 	GetUsageRecordDetail(ctx context.Context, usageID int64, scope UsageRecordScope) (*UsageRecord, error)
+	// CountKeys 返回全站密钥总数与启用数，供管理员仪表盘汇总。
+	CountKeys(ctx context.Context) (totalCount int64, activeCount int64, err error)
 	ListInviteCodesPage(ctx context.Context, cursor *TimeIDCursor, limit int) (*InviteCodePage, error)
 	ListInviteCodeRedemptionsPage(ctx context.Context, inviteCodeID string, cursor *TimeIDCursor, limit int) (*InviteCodeRedemptionPage, error)
 	CreateInviteCode(ctx context.Context, createdByUserID string, registrationLimit int) (*InviteCode, string, error)

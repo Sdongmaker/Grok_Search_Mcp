@@ -10,8 +10,18 @@ export function renderKeysPage(state) {
   }
 
   const keys = state.data.keys || [];
+  const totalKeys = Number(state.pagination.keys.totalCount || keys.length);
+  const activeKeys = Number(state.pagination.keys.activeCount || keys.filter((apiKey) => apiKey.enabled).length);
+  const latestKey = keys[0] || null;
   return `
     ${renderPageHeading("API 密钥", "为 MCP 客户端创建独立凭证，并控制每个凭证的启用状态。", createButton)}
+    ${keys.length === 0 ? "" : `
+      <div class="summary-strip" aria-label="密钥摘要">
+        <span class="summary-chip">${renderIcon("key")} 共 <strong>${escapeHTML(formatNumber(totalKeys))}</strong> 个密钥</span>
+        <span class="summary-chip">${renderIcon("check")} 启用中 <strong>${escapeHTML(formatNumber(activeKeys))}</strong></span>
+        ${latestKey ? `<span class="summary-chip">${renderIcon("plus")} 最近创建 <strong>${escapeHTML(latestKey.name)}</strong> · ${escapeHTML(formatRelativeTime(latestKey.created_at))}</span>` : ""}
+      </div>
+    `}
     ${keys.length === 0 ? `
       <div class="data-card">${renderEmptyState("key", "还没有 API 密钥", "创建第一个密钥，然后将它作为 Bearer Token 连接 /mcp 端点。", createButton)}</div>
     ` : `

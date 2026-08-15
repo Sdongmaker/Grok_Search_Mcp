@@ -93,6 +93,56 @@
   white-space: nowrap;
 }
 
+/* 端点实时状态徽标：让接入指南页直接回答「现在能不能连」 */
+.guide-endpoint-card > .guide-endpoint-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: -6px 0 16px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  font-size: 9px;
+  font-weight: 730;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.guide-endpoint-card > .guide-endpoint-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.guide-endpoint-card > .guide-endpoint-status.is-healthy {
+  background: rgba(182, 243, 75, 0.14);
+  color: var(--accent);
+}
+
+.guide-endpoint-card > .guide-endpoint-status.is-healthy i {
+  box-shadow: 0 0 0 3px rgba(182, 243, 75, 0.16);
+  animation: metric-activity-pulse 2.2s ease-in-out infinite;
+}
+
+.guide-endpoint-card > .guide-endpoint-status.is-degraded {
+  background: rgba(244, 195, 92, 0.13);
+  color: #f4c35c;
+}
+
+.guide-endpoint-card > .guide-endpoint-status.is-unhealthy {
+  background: rgba(255, 133, 133, 0.13);
+  color: #ff8585;
+}
+
+.guide-endpoint-card > .guide-endpoint-status.is-unknown {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.guide-endpoint-card > .guide-endpoint-status.is-unknown i {
+  animation: metric-activity-pulse 1.6s ease-in-out infinite;
+}
+
 .guide-endpoint-card .button-secondary {
   border-color: transparent;
   background: var(--accent);

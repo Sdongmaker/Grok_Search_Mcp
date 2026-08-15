@@ -171,6 +171,78 @@
   gap: 12px;
 }
 
+/* 顶栏健康徽标：一眼可见的上游状态，点击重新检查 */
+.health-pill {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.health-pill:hover {
+  border-color: var(--line-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.health-pill:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.health-pill i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.health-pill.is-healthy {
+  border-color: rgba(31, 138, 82, 0.22);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.health-pill.is-healthy i {
+  box-shadow: 0 0 0 3px rgba(31, 138, 82, 0.14);
+  animation: metric-activity-pulse 2.2s ease-in-out infinite;
+}
+
+.health-pill.is-degraded {
+  border-color: rgba(201, 138, 27, 0.26);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.health-pill.is-unhealthy {
+  border-color: rgba(223, 79, 75, 0.26);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.health-pill.is-unknown {
+  color: var(--ink-faint);
+}
+
+.health-pill.is-unknown i {
+  animation: metric-activity-pulse 1.6s ease-in-out infinite;
+}
+
 .icon-button.mobile-menu-button {
   display: none;
 }
@@ -282,6 +354,16 @@
   .topbar {
     height: 64px;
     padding: 0 16px;
+  }
+
+  .health-pill {
+    min-width: 30px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .health-pill span {
+    display: none;
   }
 
   .page-wrap {

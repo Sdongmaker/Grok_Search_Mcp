@@ -2,6 +2,36 @@
   min-width: 0;
 }
 
+/* 调用记录页工具栏：时间范围 + 工具/结果筛选 */
+.records-toolbar {
+  align-items: center;
+}
+
+.records-toolbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.records-toolbar-right .custom-select {
+  width: 190px;
+}
+
+.records-toolbar-right .custom-select-trigger {
+  height: 38px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .records-toolbar-right,
+  .records-toolbar-right .custom-select {
+    width: 100%;
+  }
+}
+
 .usage-progress-copy {
   display: flex;
   align-items: center;

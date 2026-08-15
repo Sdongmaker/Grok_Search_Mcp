@@ -270,12 +270,36 @@ type UpdateInviteCodeRequest struct {
 type UsageStatsResponse struct {
 	TotalCalls     int64            `json:"total_calls"`
 	SuccessCalls   int64            `json:"success_calls"`
+	AvgDurationMs  int64            `json:"avg_duration_ms"`
 	CurrentRPM     int64            `json:"current_rpm"`
 	ByTool         map[string]int64 `json:"by_tool"`
 	TrafficBuckets []UsageBucketDTO `json:"traffic_buckets"`
 	Records        []UsageRecordDTO `json:"records,omitempty"`
 	NextCursor     string           `json:"next_cursor,omitempty"`
 	HasMore        bool             `json:"has_more"`
+}
+
+// DashboardKeysSummary 汇总当前用户的密钥数量，供仪表盘一次渲染。
+type DashboardKeysSummary struct {
+	TotalCount  int64 `json:"total_count"`
+	ActiveCount int64 `json:"active_count"`
+}
+
+// DashboardGlobalStats 仅向管理员返回的全站维度统计。
+type DashboardGlobalStats struct {
+	TotalUsers int64              `json:"total_users"`
+	TotalKeys  int64              `json:"total_keys"`
+	ActiveKeys int64              `json:"active_keys"`
+	Usage      UsageStatsResponse `json:"usage"`
+}
+
+// DashboardResponse 为仪表盘首屏的聚合载荷：个人用量 + 密钥摘要 + 配额视图，
+// 管理员额外附带 global 全站统计。健康状态仍由 /overview/health 独立异步加载。
+type DashboardResponse struct {
+	User   UserResponse          `json:"user"`
+	Keys   DashboardKeysSummary  `json:"keys"`
+	Usage  UsageStatsResponse    `json:"usage"`
+	Global *DashboardGlobalStats `json:"global,omitempty"`
 }
 
 type UsageRecordsResponse struct {
@@ -461,9 +485,10 @@ func toKeyResponse(k *store.APIKey) KeyResponse {
 func toUsageStatsResponse(s *store.UsageStats) UsageStatsResponse {
 	out := UsageStatsResponse{
 		TotalCalls: s.TotalCalls, SuccessCalls: s.SuccessCalls, CurrentRPM: s.CurrentRPM,
-		ByTool:     s.ByTool,
-		HasMore:    s.RecordsPage.HasMore,
-		NextCursor: encodeUsageRecordCursor(s.RecordsPage.NextCursor),
+		AvgDurationMs: s.AverageDurationMs(),
+		ByTool:        s.ByTool,
+		HasMore:       s.RecordsPage.HasMore,
+		NextCursor:    encodeUsageRecordCursor(s.RecordsPage.NextCursor),
 	}
 	for _, bucket := range s.TrafficBuckets {
 		out.TrafficBuckets = append(out.TrafficBuckets, UsageBucketDTO{

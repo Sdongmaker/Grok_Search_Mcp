@@ -1,8 +1,9 @@
 import { renderIcon } from "../components/icons.js";
 import { escapeHTML } from "../utils.js";
 
-export function renderConfigurationGuidePage() {
+export function renderConfigurationGuidePage(state) {
   const mcpEndpoint = buildMCPEndpoint();
+  const endpointStatus = getEndpointStatusChip(state?.data?.health);
   const environmentCommand = 'export GROK_SEARCH_MCP_API_KEY="grok_xxx"';
   const claudeCodeCommand = `claude mcp add --transport http grok-search-mcp \\
   ${mcpEndpoint} \\
@@ -42,6 +43,7 @@ args = [
         <div class="guide-endpoint-card">
           <span>当前 MCP 地址</span>
           <strong>${escapeHTML(mcpEndpoint)}</strong>
+          ${endpointStatus}
           <button class="button button-secondary" type="button" data-action="copy-value" data-value="${escapeHTML(mcpEndpoint)}">
             ${renderIcon("copy")} 复制地址
           </button>
@@ -161,6 +163,19 @@ args = [
 function buildMCPEndpoint() {
   const currentOrigin = window.location.origin;
   return currentOrigin === "null" ? "http://127.0.0.1:8080/mcp" : `${currentOrigin}/mcp`;
+}
+
+// 端点实时状态：复用面板健康检查，让接入指南不只是静态文档。
+function getEndpointStatusChip(health) {
+  const presentations = {
+    healthy: { className: "is-healthy", label: "端点正常 · 上游可用" },
+    degraded: { className: "is-degraded", label: "端点可达 · 上游能力受限" },
+    unhealthy: { className: "is-unhealthy", label: "上游异常 · 请检查服务设置" },
+    unknown: { className: "is-unknown", label: "正在检查端点状态..." }
+  };
+  const status = String(health?.status || "unknown").toLowerCase();
+  const presentation = presentations[status] || presentations.unknown;
+  return `<span class="guide-endpoint-status ${escapeHTML(presentation.className)}"><i></i>${escapeHTML(presentation.label)}</span>`;
 }
 
 function renderGuideStep({ number, title, description, content }) {

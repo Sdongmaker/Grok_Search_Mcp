@@ -3,10 +3,11 @@ import { renderIcon } from "../components/icons.js";
 import { renderEmptyState, renderPageHeading } from "../components/loading.js";
 import { renderCollectionPagination } from "../components/pagination.js";
 
-export function renderTiersPage(state) {
+// options.embedded：作为「用户与访问」枢纽页的 Tab 面板渲染，创建按钮移入目录标题行。
+export function renderTiersPage(state, options = {}) {
   const createButton = `<button class="button button-primary" type="button" data-action="open-create-tier">${renderIcon("plus")} 创建配额方案</button>`;
   if (state.pageLoading && !state.data.tiers) {
-    return renderTiersLoading(createButton);
+    return renderTiersLoading(options.embedded ? "" : createButton, options);
   }
 
   const tiers = state.data.tiers || [];
@@ -14,10 +15,11 @@ export function renderTiersPage(state) {
     || tiers.reduce((totalUserCount, tier) => totalUserCount + getNonNegativeNumber(tier.user_count), 0);
   const totalTierCount = state.pagination.tiers.totalCount || tiers.length;
   const defaultTier = state.data.defaultTier || tiers.find((tier) => isDefaultTier(tier));
+  const heading = options.embedded ? "" : renderPageHeading("配额方案", "", createButton);
 
   return `
     <div class="tiers-page">
-      ${renderPageHeading("配额方案", "", createButton)}
+      ${heading}
       ${renderTierOverview(totalTierCount, assignedUserCount, defaultTier)}
       ${tiers.length === 0 ? renderEmptyTiers(createButton) : `
         <div class="tier-catalog-heading">
@@ -25,7 +27,9 @@ export function renderTiersPage(state) {
             <span class="tier-catalog-kicker">方案目录</span>
             <h2>当前配额策略</h2>
           </div>
-          <p>方案按创建时间排列；调整限额后，会同步应用到已分配用户。</p>
+          ${options.embedded
+            ? `<div class="tier-catalog-actions"><p>方案按创建时间排列；调整限额后，会同步应用到已分配用户。</p>${createButton}</div>`
+            : `<p>方案按创建时间排列；调整限额后，会同步应用到已分配用户。</p>`}
         </div>
         <section class="tier-grid" aria-label="配额方案列表">
           ${tiers.map((tier) => renderTierCard(tier)).join("")}
@@ -130,10 +134,10 @@ function renderEmptyTiers(createButton) {
   return `<div class="data-card tier-empty-card">${renderEmptyState("layers", "还没有配额方案", "先创建一套限额策略，再将它分配给需要统一管理的用户。", createButton)}</div>`;
 }
 
-function renderTiersLoading(createButton) {
+function renderTiersLoading(createButton, options = {}) {
   return `
     <div class="tiers-page">
-      ${renderPageHeading("配额方案", "", createButton)}
+      ${options.embedded ? "" : renderPageHeading("配额方案", "", createButton)}
       <div class="skeleton tier-overview-skeleton"></div>
       <div class="tier-catalog-heading">
         <div>

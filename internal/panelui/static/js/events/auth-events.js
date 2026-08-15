@@ -41,7 +41,7 @@ export function createAuthEvents({
     state.authError = "";
     state.authenticationSettingsStatus = "loading";
     state.authenticationSettingsError = "";
-    state.currentPage = "overview";
+    state.currentPage = "dashboard";
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     renderApplication();
     await reloadAuthenticationSettings();
@@ -83,11 +83,11 @@ export function createAuthEvents({
       panelAPI.saveSession(loginResponse.token, loginResponse.expires_at);
       state.user = loginResponse.user;
       state.authenticated = true;
-      state.currentPage = "overview";
+      state.currentPage = "dashboard";
       state.authBusy = false;
       state.authError = "";
       clearCachedData();
-      window.history.replaceState(null, "", "#overview");
+      window.history.replaceState(null, "", "#dashboard");
       renderApplication();
       showToast("欢迎回来", `已以 ${state.user.username} 的身份安全登录。`, "success");
       await loadCurrentPage();

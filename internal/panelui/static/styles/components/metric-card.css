@@ -296,6 +296,45 @@
   height: 52px;
 }
 
+/* bar 视觉：耗时类指标的横向微量条 */
+.metric-visual-bar {
+  display: grid;
+  width: 82px;
+  flex: 0 0 82px;
+  align-content: center;
+  gap: 7px;
+}
+
+.metric-bar-track {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--metric-ink, var(--blue)) 12%, transparent);
+}
+
+.metric-bar-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: currentColor;
+  transform: scaleX(var(--bar-ratio, 0));
+  transform-origin: left;
+  transition: transform var(--transition-smooth);
+}
+
+.metric-visual-bar:not(.is-empty) .metric-bar-track i {
+  animation: grow-bar 800ms var(--ease-silk) both;
+}
+
+.metric-bar-scale {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ink-faint);
+  font-size: 8px;
+  font-weight: 650;
+}
+
 .metric-visual-nodes > svg {
   position: absolute;
   top: 5px;

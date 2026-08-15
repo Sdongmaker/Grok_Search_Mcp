@@ -87,12 +87,16 @@ func (Store) GetUsageStats(context.Context, string, time.Time) (*store.UsageStat
 func (Store) GetUserUsageStatsPage(context.Context, string, time.Time, *store.UsageRecordCursor, int) (*store.UsageStats, error) {
 	return nil, nil
 }
+func (Store) GetGlobalUsageStatsPage(context.Context, time.Time, *store.UsageRecordCursor, int) (*store.UsageStats, error) {
+	return &store.UsageStats{ByTool: map[string]int64{}}, nil
+}
 func (Store) ListUsageRecordsPage(context.Context, store.UsageRecordListScope, time.Time, *store.UsageRecordCursor, int) (*store.UsageRecordPage, error) {
 	return &store.UsageRecordPage{}, nil
 }
 func (Store) GetUsageRecordDetail(context.Context, int64, store.UsageRecordScope) (*store.UsageRecord, error) {
 	return nil, nil
 }
+func (Store) CountKeys(context.Context) (int64, int64, error) { return 0, 0, nil }
 
 func (Store) GetServerSettings(context.Context) (*store.ServerSettings, error) { return nil, nil }
 func (Store) UpsertServerSettings(context.Context, store.ServerSettings) (*store.ServerSettings, error) {

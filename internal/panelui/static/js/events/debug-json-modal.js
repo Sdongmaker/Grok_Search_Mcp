@@ -39,7 +39,8 @@ export function createDebugJSONModalEvents({
   copyValue
 }) {
   async function openDebugJSONModal(recordIdentifier) {
-    const pageUsageRecords = state.data.usage?.records || [];
+    // 记录来源：调用记录页的数据与用量弹窗（用户/密钥）中的记录。
+    const pageUsageRecords = state.data.records?.records || [];
     const modalUsageRecords = state.modal?.usage?.records || [];
     const matchingRecord = [...modalUsageRecords, ...pageUsageRecords].find(
       (usageRecord) => String(usageRecord.id) === String(recordIdentifier)

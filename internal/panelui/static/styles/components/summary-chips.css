@@ -1,0 +1,45 @@
+/* 摘要胶囊条：密钥页与调用记录页的范围概览 */
+
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.summary-chip {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 600;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.summary-chip:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.summary-chip .app-icon {
+  width: 14px;
+  height: 14px;
+  flex-basis: 14px;
+  color: var(--ink-faint);
+}
+
+.summary-chip strong {
+  color: var(--ink);
+  font-weight: 730;
+}

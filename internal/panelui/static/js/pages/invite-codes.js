@@ -3,15 +3,25 @@ import { renderIcon } from "../components/icons.js";
 import { renderEmptyState, renderPageHeading, renderStatusBadge } from "../components/loading.js";
 import { renderCollectionPagination } from "../components/pagination.js";
 
-export function renderInvitesPage(state) {
+// options.embedded：作为「用户与访问」枢纽页的 Tab 面板渲染，省略页面级标题。
+export function renderInvitesPage(state, options = {}) {
   const createButton = `<button class="button button-primary" type="button" data-action="open-create-invite">${renderIcon("plus")} 创建邀请码</button>`;
+  const heading = options.embedded
+    ? ""
+    : renderPageHeading("邀请码", "完整邀请码按需解密，仅管理员可以复制。", createButton);
   if (state.pageLoading && !state.data.invites) {
-    return `${renderPageHeading("邀请码", "完整邀请码按需解密，仅管理员可以复制。", createButton)}<div class="skeleton" style="height:310px;border-radius:16px"></div>`;
+    return `${heading}<div class="skeleton" style="height:310px;border-radius:16px"></div>`;
   }
 
   const invites = state.data.invites || [];
   return `
-    ${renderPageHeading("邀请码", "列表仅显示前缀；点击复制时按需解密完整邀请码。", createButton)}
+    ${heading}
+    ${options.embedded && invites.length > 0 ? `
+      <div class="toolbar">
+        <span class="muted" style="font-size:11px">列表仅显示前缀；点击复制时按需解密完整邀请码。</span>
+        ${createButton}
+      </div>
+    ` : ""}
     ${invites.length === 0 ? `<div class="data-card">${renderEmptyState("ticket", "还没有邀请码", "创建邀请码后，用户可在邀请注册模式下完成账户创建。", createButton)}</div>` : `
       <div class="invite-list">${invites.map((inviteCode) => {
         const usagePercent = calculatePercent(inviteCode.registration_count, inviteCode.registration_limit);

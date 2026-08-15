@@ -1,6 +1,27 @@
 import { escapeHTML, getInitials } from "../utils.js";
 import { renderIcon } from "./icons.js";
 
+// 顶栏健康徽标：复用仪表盘健康检查的状态，点击可重新检查。
+function renderHealthPill(health) {
+  const presentations = {
+    healthy: { className: "is-healthy", label: "服务正常" },
+    degraded: { className: "is-degraded", label: "能力受限" },
+    unhealthy: { className: "is-unhealthy", label: "上游异常" },
+    unknown: { className: "is-unknown", label: "状态未知" }
+  };
+  const status = String(health?.status || "unknown").toLowerCase();
+  const presentation = presentations[status] || presentations.unknown;
+  return `
+    <button
+      class="health-pill ${escapeHTML(presentation.className)}"
+      type="button"
+      data-action="recheck-health"
+      title="上游健康状态：${escapeHTML(presentation.label)}，点击重新检查"
+      aria-label="上游健康状态：${escapeHTML(presentation.label)}，点击重新检查"
+    ><i></i><span>${escapeHTML(presentation.label)}</span></button>
+  `;
+}
+
 export function renderShell(state, currentMetadata, currentPageHTML) {
   const isAdmin = state.user?.role === "admin";
   const refreshDisabled = Boolean(state.refreshing || state.formBusy);
@@ -35,6 +56,7 @@ export function renderShell(state, currentMetadata, currentPageHTML) {
             <span class="breadcrumb">${escapeHTML(currentMetadata.section)} / <strong>${escapeHTML(currentMetadata.title)}</strong></span>
           </div>
           <div class="topbar-actions">
+            ${renderHealthPill(state.data.health)}
             ${refreshButtonHTML}
           </div>
         </header>
@@ -47,7 +69,6 @@ export function renderShell(state, currentMetadata, currentPageHTML) {
 }
 
 function renderSidebar(state, isAdmin) {
-  const operationsMetricsEnabled = Boolean(state.data.settings?.operations_metrics_enabled);
   const renderNavigationItem = (page, label, icon) => `
     <button class="nav-item ${state.currentPage === page ? "is-active" : ""}" type="button" data-action="navigate" data-page="${page}">
       ${renderIcon(icon)}<span>${escapeHTML(label)}</span>
@@ -65,10 +86,16 @@ function renderSidebar(state, isAdmin) {
         <section class="nav-section">
           <p class="nav-section-label">Workspace</p>
           <nav class="nav-list" aria-label="工作台导航">
-            ${renderNavigationItem("overview", "总览", "home")}
+            ${renderNavigationItem("dashboard", "仪表盘", "home")}
+            ${renderNavigationItem("records", "调用记录", "activity")}
+          </nav>
+        </section>
+
+        <section class="nav-section">
+          <p class="nav-section-label">Access</p>
+          <nav class="nav-list" aria-label="访问导航">
             ${renderNavigationItem("keys", "API 密钥", "key")}
-            ${renderNavigationItem("usage", "调用分析", "chart")}
-            ${renderNavigationItem("tutorial", "配置教程", "code")}
+            ${renderNavigationItem("guide", "接入指南", "code")}
           </nav>
         </section>
 
@@ -76,11 +103,8 @@ function renderSidebar(state, isAdmin) {
           <section class="nav-section">
             <p class="nav-section-label">Administration</p>
             <nav class="nav-list" aria-label="系统管理导航">
-              ${renderNavigationItem("users", "用户管理", "users")}
-              ${renderNavigationItem("tiers", "配额方案", "layers")}
-              ${renderNavigationItem("invites", "邀请码", "ticket")}
-              ${operationsMetricsEnabled ? renderNavigationItem("operationsMetrics", "运行指标", "activity") : ""}
-              ${renderNavigationItem("settings", "服务设置", "settings")}
+              ${renderNavigationItem("access", "用户与访问", "users")}
+              ${renderNavigationItem("system", "系统", "settings")}
             </nav>
           </section>
         ` : ""}

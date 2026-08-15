@@ -236,6 +236,18 @@ func (s *SQLiteStore) GetKeyByID(ctx context.Context, id string) (*APIKey, error
 	return k, err
 }
 
+// CountKeys 统计全站密钥总数与启用数，供管理员仪表盘汇总；不做用户维度过滤。
+func (s *SQLiteStore) CountKeys(ctx context.Context) (int64, int64, error) {
+	var totalCount, activeCount int64
+	err := s.readDB.QueryRowContext(ctx,
+		`SELECT COUNT(*), COALESCE(SUM(CASE WHEN enabled = 1 THEN 1 ELSE 0 END), 0) FROM apikeys`,
+	).Scan(&totalCount, &activeCount)
+	if err != nil {
+		return 0, 0, err
+	}
+	return totalCount, activeCount, nil
+}
+
 // UpdateKey 动态拼接 SET 子句，仅更新 KeyUpdates 中非 nil 字段。
 func (s *SQLiteStore) UpdateKey(ctx context.Context, id string, updates KeyUpdates) (*APIKey, error) {
 	existingAPIKey, err := s.GetKeyByID(ctx, id)

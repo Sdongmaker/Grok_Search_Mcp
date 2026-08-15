@@ -28,7 +28,7 @@ type usageQueryExecutor interface {
 }
 
 func buildUsageStatsAggregateQuery(where string) string {
-	return `SELECT tool_name, COUNT(*), COALESCE(SUM(success), 0) FROM usage_log WHERE ` +
+	return `SELECT tool_name, COUNT(*), COALESCE(SUM(success), 0), COALESCE(SUM(duration_ms), 0) FROM usage_log WHERE ` +
 		where + ` AND timestamp >= ? GROUP BY tool_name`
 }
 
@@ -52,7 +52,7 @@ var usageRollupSources = []usageRollupSource{
 }
 
 func buildUsageRollupStatsAggregateQuery(source usageRollupSource, where string) string {
-	return `SELECT tool_name, COALESCE(SUM(total_calls), 0), COALESCE(SUM(success_calls), 0) FROM ` +
+	return `SELECT tool_name, COALESCE(SUM(total_calls), 0), COALESCE(SUM(success_calls), 0), COALESCE(SUM(duration_ms_total), 0) FROM ` +
 		source.tableName + ` WHERE ` + where + ` AND ` + source.timestampColumn + ` >= ? GROUP BY tool_name`
 }
 
@@ -68,6 +68,16 @@ func (s *SQLiteStore) GetUserUsageStatsPage(
 	limit int,
 ) (*UsageStats, error) {
 	return s.queryUsageStats(ctx, usageStatsByUser, []any{userID}, since, cursor, limit)
+}
+
+// GetGlobalUsageStatsPage 聚合全站所有密钥的用量统计，供管理员仪表盘的全站视角使用。
+func (s *SQLiteStore) GetGlobalUsageStatsPage(
+	ctx context.Context,
+	since time.Time,
+	cursor *UsageRecordCursor,
+	limit int,
+) (*UsageStats, error) {
+	return s.queryUsageStats(ctx, usageStatsGlobal, nil, since, cursor, limit)
 }
 
 const (
@@ -209,10 +219,11 @@ func scanUsageAggregateRows(rows *sql.Rows, stats *UsageStats) error {
 		var toolName string
 		var callCount int64
 		var successCount int64
-		if err := rows.Scan(&toolName, &callCount, &successCount); err != nil {
+		var durationMsTotal int64
+		if err := rows.Scan(&toolName, &callCount, &successCount, &durationMsTotal); err != nil {
 			return err
 		}
-		addUsageAggregate(stats, toolName, callCount, successCount)
+		addUsageAggregate(stats, toolName, callCount, successCount, durationMsTotal)
 	}
 	return rows.Err()
 }
@@ -237,10 +248,11 @@ func addRollupUsageAggregates(
 	return scanUsageAggregateRows(rows, stats)
 }
 
-func addUsageAggregate(stats *UsageStats, toolName string, callCount, successCount int64) {
+func addUsageAggregate(stats *UsageStats, toolName string, callCount, successCount, durationMsTotal int64) {
 	stats.ByTool[toolName] += callCount
 	stats.TotalCalls += callCount
 	stats.SuccessCalls += successCount
+	stats.DurationMsTotal += durationMsTotal
 }
 
 func truncateUsageRollupBoundary(timestamp time.Time, bucketDuration time.Duration) time.Time {
